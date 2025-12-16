@@ -1,0 +1,28 @@
+{
+    "name": "sysvale/cuids-generator",
+    "description": "Gerador de módulos",
+    "type": "library",
+    "license": "Apache-2.0",
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^10|^11",
+        "illuminate/console": "^10|^11",
+        "laravel-shift/blueprint": "^2.12",
+        "jasonmccreary/laravel-test-assertions": "^0.1.0",
+        "symfony/yaml": "^7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sysvale\\CuidsGenerator\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Sysvale\\CuidsGenerator\\Providers\\CuidsGeneratorServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
