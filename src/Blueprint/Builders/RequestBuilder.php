@@ -8,9 +8,11 @@ class RequestBuilder
 {
     public function build(string $model, array $fields): array
     {
+        $rules = ValidationRuleBuilder::build($fields);
+
         return [
-            "Store{$model}Request" => ValidationRuleBuilder::required($fields),
-            "Update{$model}Request" => ValidationRuleBuilder::optional($fields),
+            "Store{$model}Request" => $rules,
+            "Update{$model}Request" => $rules,
         ];
     }
 }

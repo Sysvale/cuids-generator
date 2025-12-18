@@ -4,22 +4,12 @@ namespace Sysvale\CuidsGenerator\Blueprint\Builders;
 
 class ValidationRuleBuilder
 {
-    public static function required(array $fields): array
+    public static function build(array $fields): array
     {
-        return self::build($fields, false);
+        return collect($fields)->map(fn ($type) => self::rule($type))->toArray();
     }
 
-    public static function optional(array $fields): array
-    {
-        return self::build($fields, true);
-    }
-
-    private static function build(array $fields, bool $partial): array
-    {
-        return collect($fields)->map(fn ($type) => self::rule($type, $partial))->toArray();
-    }
-
-    private static function rule(string $type, bool $partial): string
+    private static function rule(string $type): string
     {
         $rules = match ($type) {
             'string' => 'string|max:255',
@@ -29,6 +19,6 @@ class ValidationRuleBuilder
             default => 'string',
         };
 
-        return $partial ? "sometimes|{$rules}" : "required|{$rules}";
+        return "required|{$rules}";
     }
 }
