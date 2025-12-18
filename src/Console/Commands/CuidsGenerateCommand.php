@@ -9,10 +9,9 @@ use Sysvale\CuidsGenerator\Blueprint\Builders\DraftBuilder;
 use Sysvale\CuidsGenerator\Console\Editors\FieldEditor;
 use Sysvale\CuidsGenerator\Console\Editors\RelationshipEditor;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessorRunner;
-use Sysvale\CuidsGenerator\Blueprint\PostProcessors\MongoCastCleanupPostProcessor;
-use Sysvale\CuidsGenerator\Blueprint\PostProcessors\MongoModelPostProcessor;
-use Sysvale\CuidsGenerator\Blueprint\PostProcessors\MongoSoftDeletesPostProcessor;
-use Sysvale\CuidsGenerator\Blueprint\PostProcessors\MongoVisibilityPostProcessor;
+use function Laravel\Prompts\text;
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\note;
 
 class CuidsGenerateCommand extends Command
 {
@@ -44,7 +43,7 @@ class CuidsGenerateCommand extends Command
 
     public function handle()
     {
-        $entity = $this->ask('Qual o nome do model (em inglês)?');
+        $entity = text('Qual o nome do model (em inglês e no singular)?');
 
         $fields = $this->fieldEditor->run($this);
         $relationships = [];
@@ -53,10 +52,15 @@ class CuidsGenerateCommand extends Command
 
         $this->newLine();
 
-        if ($this->confirm('Adicionar relacionamentos?')) {
-            $this->newLine();
-
+        if (confirm(
+            label: 'Deseja adicionar relacionamentos a este model?',
+            default: true,
+            yes: 'Sim, configurar agora',
+            no: 'Não, pular esta estapa'
+        )) {
             $relationships = $this->relationshipEditor->run($this);
+        } else {
+            note('Nenhum relacionamento configurado.');
         }
 
         $draft = $this->draftBuilder->build($entityStudly, $fields, $relationships);
