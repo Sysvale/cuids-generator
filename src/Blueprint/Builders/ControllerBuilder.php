@@ -20,6 +20,7 @@ class ControllerBuilder
                 'store' => [
                     'validate' => "Store{$model}Request",
                     'save' => $singularVar,
+                    'respond' => 201,
                 ],
                 'show' => [
                     'resource' => $singularVar,
@@ -27,9 +28,11 @@ class ControllerBuilder
                 'update' => [
                     'validate' => "Update{$model}Request",
                     'update' => $singularVar,
+                    'respond' => 200
                 ],
                 'destroy' => [
                     'delete' => $singularVar,
+                    'respond' => 204
                 ],
             ],
         ];
