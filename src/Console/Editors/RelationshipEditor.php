@@ -4,6 +4,12 @@ namespace Sysvale\CuidsGenerator\Console\Editors;
 
 use Sysvale\CuidsGenerator\Support\RelationshipType;
 use Illuminate\Console\Command;
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\text;
+use function Laravel\Prompts\table;
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\warning;
+use function Laravel\Prompts\confirm;
 
 class RelationshipEditor
 {
@@ -11,75 +17,103 @@ class RelationshipEditor
     {
         $relationships = [];
 
-        $cli->info('Configuração de relacionamentos');
+        info('Configuração de Relacionamentos (MongoDB)');
 
         while (true) {
-            $action = $cli->choice(
-                'Relacionamentos',
-                ['Adicionar', 'Atualizar', 'Remover', 'Listar', 'Finalizar'],
+            $action = select(
+                label: 'Gerenciar relacionamentos',
+                options: [
+                    'add'    => 'Adicionar novo',
+                    'update' => 'Atualizar existente',
+                    'remove' => 'Remover',
+                    'list'   => 'Listar todos',
+                    'done'   => 'Finalizar',
+                ],
+                default: 'add'
             );
 
-            match ($action) {
-                'Adicionar' => $this->add($cli, $relationships),
-                'Atualizar' => $this->update($cli, $relationships),
-                'Remover' => $this->remove($cli, $relationships),
-                'Listar' => $this->list($cli, $relationships),
-                'Finalizar' => null,
-            };
+            if ($action === 'done') break;
 
-            if ($action === 'Finalizar') break;
+            match ($action) {
+                'add'    => $this->add($relationships),
+                'update' => $this->update($relationships),
+                'remove' => $this->remove($relationships),
+                'list'   => $this->list($relationships),
+            };
         }
 
         return $relationships;
     }
 
-    private function add(Command $cli, array &$fields): void
+    private function add(array &$relationships): void
     {
-        $name = $cli->ask('Nome da collection (Ex: User)');
+        $name = text(
+            label: 'Nome do Model relacionado (Ex: User, Category)',
+            placeholder: 'Sempre em StudlyCase e singular',
+            validate: fn (string $value) => match (true) {
+                empty($value) => 'O nome é obrigatório.',
+                isset($relationships[$value]) => 'Este relacionamento já foi definido.',
+                default => null,
+            }
+        );
 
-        if (! $name || isset($fields[$name])) {
-            $cli->warn('Campo inválido ou duplicado.');
-            return;
-        }
+        $type = select(
+            label: "Qual o tipo de relacionamento com '{$name}'?",
+            options: RelationshipType::values(),
+            hint: 'Lembre-se: belongsTo criará um campo _id no documento atual.'
+        );
 
-        $type = $cli->choice('Tipo de relacionamento', RelationshipType::values());
-
-        $fields[$name] = $type;
+        $relationships[$name] = $type;
+        info("Relacionamento '{$name} ({$type})' adicionado.");
     }
 
-    private function update(Command $cli, array &$relationships): void
+    private function update(array &$relationships): void
     {
-        if (empty($relationships)) {
-            $cli->warn('Nenhum relacionamento.');
-            return;
-        }
+        if ($this->isEmpty($relationships)) return;
 
-        $collection = $cli->choice(
-            'Escolha a collection para atualizar o relacionamento',
+        $collection = select(
+            'Selecione o relacionamento para atualizar',
             array_keys($relationships)
         );
 
-        $newType = $cli->choice(
-            'Novo tipo de relacionamento',
-            RelationshipType::values(),
-            0
+        $newType = select(
+            label: "Novo tipo para '{$collection}'",
+            options: RelationshipType::values(),
+            default: $relationships[$collection]
         );
 
         $relationships[$collection] = $newType;
-
-        $cli->info("Relacionamento de '{$collection}' atualizado para '{$newType}'.");
+        info("Atualizado: '{$collection}' agora é '{$newType}'.");
     }
 
-    private function remove(Command $cli, array &$fields): void
+    private function remove(array &$relationships): void
     {
-        if (empty($fields)) return;
+        if ($this->isEmpty($relationships)) return;
 
-        $name = $cli->choice('Escolhar a collection para remover o relacionamento', array_keys($fields));
-        unset($fields[$name]);
+        $name = select('Remover qual relacionamento?', array_keys($relationships));
+        
+        if (confirm("Deseja realmente remover o vínculo com '{$name}'?")) {
+            unset($relationships[$name]);
+            warning("Relacionamento com '{$name}' removido.");
+        }
     }
 
-    private function list(Command $cli, array $fields): void
+    private function list(array $relationships): void
     {
-        $cli->table(['Collection', 'Relacionamento'], collect($fields)->map(fn ($t, $n) => [$n, $t]));
+        if ($this->isEmpty($relationships)) return;
+
+        table(
+            ['Model Relacionado', 'Tipo'],
+            collect($relationships)->map(fn ($t, $n) => [$n, $t])->toArray()
+        );
+    }
+
+    private function isEmpty(array $relationships): bool
+    {
+        if (empty($relationships)) {
+            warning('Nenhum relacionamento configurado.');
+            return true;
+        }
+        return false;
     }
 }

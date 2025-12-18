@@ -4,6 +4,12 @@ namespace Sysvale\CuidsGenerator\Console\Editors;
 
 use Sysvale\CuidsGenerator\Support\FieldType;
 use Illuminate\Console\Command;
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\text;
+use function Laravel\Prompts\table;
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\warning;
+use function Laravel\Prompts\confirm;
 
 class FieldEditor
 {
@@ -11,80 +17,114 @@ class FieldEditor
     {
         $fields = [];
 
-        $cli->info('Configuração dos campos');
+        info('Configuração dos campos');
 
         while (true) {
-            $action = $cli->choice(
-                'Campos',
-                ['Adicionar', 'Atualizar nome', 'Atualizar tipo', 'Remover', 'Listar', 'Finalizar'],
+            $action = select(
+                label: 'O que deseja fazer com os campos?',
+                options: [
+                    'add' => 'Adicionar',
+                    'rename' => 'Atualizar nome',
+                    'change-type' => 'Atualizar tipo',
+                    'remove' => 'Remover',
+                    'list' => 'Listar',
+                    'done' => 'Ir para próxima etapa',
+                ],
+                default: 'add',
             );
 
             match ($action) {
-                'Adicionar' => $this->add($cli, $fields),
-                'Atualizar nome' => $this->rename($cli, $fields),
-                'Atualizar tipo' => $this->changeType($cli, $fields),
-                'Remover' => $this->remove($cli, $fields),
-                'Listar' => $this->list($cli, $fields),
-                'Finalizar' => null,
+                'add' => $this->add($fields),
+                'rename' => $this->rename($fields),
+                'change-type' => $this->changeType($fields),
+                'remove' => $this->remove($fields),
+                'list' => $this->list($fields),
+                'done' => null,
             };
 
-            if ($action === 'Finalizar') break;
+            if ($action === 'done') break;
         }
 
         return $fields;
     }
 
-    private function add(Command $cli, array &$fields): void
+    private function add(array &$fields): void
     {
-        $name = $cli->ask('Nome do campo');
+        $name = text(
+            label: 'Nome do campo',
+            placeholder: 'ex: title',
+            validate: fn (string $value) => match (true) {
+                empty($value) => 'O nome é obrigatório',
+                isset($fields[$value]) => 'Este campo já existe',
+                default => null,
+            }
+        );
 
-        if (! $name || isset($fields[$name])) {
-            $cli->warn('Campo inválido ou duplicado.');
-            return;
-        }
-
-        $type = $cli->choice('Tipo', FieldType::values(), 0);
+        $type = select(
+            label: "Qual o tipo de '{$name}'?",
+            options: FieldType::values(),
+            default: FieldType::values()[0]
+        );
 
         $fields[$name] = $type;
     }
 
-    private function rename(Command $cli, array &$fields): void
+private function rename(array &$fields): void
     {
-        if (empty($fields)) {
-            $cli->warn('Nenhum campo.');
-            return;
-        }
+        if ($this->isEmpty($fields)) return;
 
-        $old = $cli->choice('Campo', array_keys($fields));
-        $new = $cli->ask('Novo nome');
-
-        if (! $new || isset($fields[$new])) {
-            $cli->warn('Nome inválido.');
-            return;
-        }
+        $old = select('Selecione o campo para renomear', array_keys($fields));
+        $new = text(
+            label: "Novo nome para '{$old}'",
+            validate: fn (string $value) => match (true) {
+                empty($value) => 'O nome é obrigatório.',
+                isset($fields[$value]) => 'Este nome já está em uso.',
+                default => null,
+            }
+        );
 
         $fields[$new] = $fields[$old];
         unset($fields[$old]);
     }
 
-    private function changeType(Command $cli, array &$fields): void
+    private function changeType(array &$fields): void
     {
-        if (empty($fields)) return;
+        if ($this->isEmpty($fields)) return;
 
-        $name = $cli->choice('Campo', array_keys($fields));
-        $fields[$name] = $cli->choice('Tipo', FieldType::values(), 0);
+        $name = select('Alterar tipo de qual campo?', array_keys($fields));
+        $fields[$name] = select(
+            label: "Novo tipo para '{$name}'",
+            options: FieldType::values()
+        );
     }
 
-    private function remove(Command $cli, array &$fields): void
+    private function remove(array &$fields): void
     {
-        if (empty($fields)) return;
+        if ($this->isEmpty($fields)) return;
 
-        $name = $cli->choice('Campo', array_keys($fields));
-        unset($fields[$name]);
+        $name = select('Remover qual campo?', array_keys($fields));
+        
+        if (confirm("Tem certeza que deseja remover '{$name}'?")) {
+            unset($fields[$name]);
+        }
     }
 
-    private function list(Command $cli, array $fields): void
+    private function list(array $fields): void
     {
-        $cli->table(['Campo', 'Tipo'], collect($fields)->map(fn ($t, $n) => [$n, $t]));
+        if ($this->isEmpty($fields)) return;
+
+        table(
+            ['Campo', 'Tipo'],
+            collect($fields)->map(fn ($t, $n) => [$n, $t])->toArray()
+        );
+    }
+
+    private function isEmpty(array $fields): bool
+    {
+        if (empty($fields)) {
+            warning('Nenhum campo configurado até o momento.');
+            return true;
+        }
+        return false;
     }
 }
