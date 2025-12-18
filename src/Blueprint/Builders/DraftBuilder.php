@@ -13,10 +13,8 @@ class DraftBuilder
         protected ControllerBuilder $controllerBuilder
     ) {}
 
-    public function build(string $entity, array $fields, array $relationships): array
+    public function build(string $model, array $fields, array $relationships): array
     {
-        $model = Str::studly(Str::singular($entity));
-
         $draft = [
             'models' => [
                 $model => $fields,

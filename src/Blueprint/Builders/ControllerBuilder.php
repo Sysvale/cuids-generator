@@ -8,26 +8,28 @@ class ControllerBuilder
 {
     public function build(string $model): array
     {
-        $resource = Str::camel($model);
+        $singularVar = Str::camel($model);
+        $pluralVar = Str::camel(Str::plural($model));
 
         return [
             "{$model}Controller" => [
                 'index' => [
-                    'query' => 'all',
+                    'query' => "all",
+                    'resource' => "paginate:{$pluralVar}",
                 ],
                 'store' => [
                     'validate' => "Store{$model}Request",
-                    'save' => $resource,
+                    'save' => $singularVar,
                 ],
                 'show' => [
-                    'query' => 'find:id',
+                    'resource' => $singularVar,
                 ],
                 'update' => [
                     'validate' => "Update{$model}Request",
-                    'save' => $resource,
+                    'update' => $singularVar,
                 ],
                 'destroy' => [
-                    'delete' => $resource,
+                    'delete' => $singularVar,
                 ],
             ],
         ];
