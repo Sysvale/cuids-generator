@@ -12,9 +12,7 @@ class MongoModelPostProcessor implements PostProcessor
     {
         $path = app_path("Models/{$model}.php");
 
-        if (! File::exists($path)) {
-            return;
-        }
+        if (! File::exists($path)) return;
 
         $content = File::get($path);
 
