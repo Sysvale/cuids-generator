@@ -13,7 +13,7 @@ use function Laravel\Prompts\confirm;
 
 class RelationshipEditor
 {
-    public function run(Command $cli): array
+    public function run(array $models): array
     {
         $relationships = [];
 
@@ -23,7 +23,8 @@ class RelationshipEditor
             $action = select(
                 label: 'Gerenciar relacionamentos',
                 options: [
-                    'add'    => 'Adicionar novo',
+                    'add' => 'Adicionar novo',
+                    'select' => 'Selecionar',
                     'update' => 'Atualizar existente',
                     'remove' => 'Remover',
                     'list'   => 'Listar todos',
@@ -36,6 +37,7 @@ class RelationshipEditor
 
             match ($action) {
                 'add'    => $this->add($relationships),
+                'select' => $this->select($relationships, $models),
                 'update' => $this->update($relationships),
                 'remove' => $this->remove($relationships),
                 'list'   => $this->list($relationships),
@@ -64,7 +66,29 @@ class RelationshipEditor
         );
 
         $relationships[$name] = $type;
+
         info("Relacionamento '{$name} ({$type})' adicionado.");
+    }
+
+    private function select(array &$relationships, array &$models): void
+    {
+
+        $model = select(
+            label: "Selecione o model para relacionamento",
+            options: $models,
+            hint: 'Lembre-se: belongsTo criará um campo _id no documento atual.'
+        );
+
+        $type = select(
+            label: "Qual o tipo de relacionamento com '{$model}'?",
+            options: RelationshipType::values(),
+            hint: 'Lembre-se: belongsTo criará um campo _id no documento atual.'
+        );
+
+        $relationships[$model] = $type;
+        info("Relacionamento '{$model} ({$type})' adicionado.");
+
+        $this->list($relationships);
     }
 
     private function update(array &$relationships): void
@@ -83,7 +107,10 @@ class RelationshipEditor
         );
 
         $relationships[$collection] = $newType;
+
         info("Atualizado: '{$collection}' agora é '{$newType}'.");
+
+        $this->list($relationships);
     }
 
     private function remove(array &$relationships): void
@@ -96,6 +123,8 @@ class RelationshipEditor
             unset($relationships[$name]);
             warning("Relacionamento com '{$name}' removido.");
         }
+
+        $this->list($relationships);
     }
 
     private function list(array $relationships): void
