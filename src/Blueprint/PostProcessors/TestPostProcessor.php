@@ -20,11 +20,11 @@ class TestPostProcessor
         $stub = File::get($stubPath);
 
         $replaces = [
-            '{{ model }}'        => $model,
-            '{{ pluralModel }}'  => Str::plural($model),
-            '{{ route }}'        => Str::kebab(Str::plural($model)),
-            '{{ table }}'        => Str::snake(Str::plural($model)),
-            '{{ variable }}'     => Str::camel($model),
+            '{{ model }}' => $model,
+            '{{ pluralModel }}' => Str::plural($model),
+            '{{ route }}' => Str::kebab(Str::plural($model)),
+            '{{ table }}' => Str::snake(Str::plural($model)),
+            '{{ variable }}' => Str::camel($model),
         ];
 
         $content = str_replace(
