@@ -5,10 +5,10 @@ namespace Sysvale\CuidsGenerator\Support;
 enum FieldType: string
 {
     case ARRAY = 'array';
-    case DATE = 'date';
     case BOOLEAN = 'boolean';
-    case INTEGER = 'integer';
+    case DATE = 'date';
     case FLOAT = 'float';
+    case INTEGER = 'integer';
     case STRING = 'string';
     case TIMESTAMP = 'timestamp';
 

@@ -13,15 +13,15 @@ use function Laravel\Prompts\confirm;
 
 class FieldEditor
 {
-    public function run(Command $cli): array
+    public function run(): array
     {
         $fields = [];
 
-        info('Configuração dos campos');
+        info('Defina os atributos do model');
 
         while (true) {
             $action = select(
-                label: 'O que deseja fazer com os campos?',
+                label: 'Gerencie os atributos do model',
                 options: [
                     'add' => 'Adicionar',
                     'rename' => 'Atualizar nome',
@@ -67,6 +67,8 @@ class FieldEditor
         );
 
         $fields[$name] = $type;
+
+        $this->list($fields);
     }
 
 private function rename(array &$fields): void
@@ -85,6 +87,8 @@ private function rename(array &$fields): void
 
         $fields[$new] = $fields[$old];
         unset($fields[$old]);
+
+        $this->list($fields);
     }
 
     private function changeType(array &$fields): void
@@ -96,6 +100,8 @@ private function rename(array &$fields): void
             label: "Novo tipo para '{$name}'",
             options: FieldType::values()
         );
+
+        $this->list($fields);
     }
 
     private function remove(array &$fields): void
@@ -107,6 +113,8 @@ private function rename(array &$fields): void
         if (confirm("Tem certeza que deseja remover '{$name}'?")) {
             unset($fields[$name]);
         }
+
+        $this->list($fields);
     }
 
     private function list(array $fields): void

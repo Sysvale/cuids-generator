@@ -5,13 +5,13 @@ namespace Sysvale\CuidsGenerator\Providers;
 use Illuminate\Support\ServiceProvider;
 use Sysvale\CuidsGenerator\Console\Commands\CuidsGenerateCommand;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessorRunner;
+use Sysvale\CuidsGenerator\Blueprint\PostProcessors\ControllerPostProcessor;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessors\CollectionPostProcessor;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessors\FactoryPostProcessor;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessors\Mongo\MongoModelTransformer;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessors\RequestPostProcessor;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessors\TestPostProcessor;
 use Illuminate\Support\Facades\File;
-use Sysvale\CuidsGenerator\Blueprint\PostProcessors\ControllerPostProcessor;
 
 class CuidsGeneratorServiceProvider extends ServiceProvider
 {
