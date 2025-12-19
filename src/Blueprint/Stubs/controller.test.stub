@@ -3,7 +3,6 @@
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\{{ model }};
-use App\Models\User;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
@@ -29,6 +28,9 @@ class {{ model }}ControllerTest extends TestCase
         $data = {{ model }}::factory()->make()->toArray();
 
         $this->postJson(route('{{ route }}.store'), $data)
+            ->assertJsonFragment([
+                'message' => 'Criado com sucesso'
+            ])
             ->assertStatus(201);
     }
 
@@ -45,7 +47,10 @@ class {{ model }}ControllerTest extends TestCase
         $model = {{ model }}::factory()->create();
         $updatedData = {{ model }}::factory()->make()->toArray();
 
-        $response = $this->putJson(route('{{ route }}.update', $model), $updatedData)
+        $this->putJson(route('{{ route }}.update', $model), $updatedData)
+            ->assertJsonFragment([
+                'message' => 'Atualizado com sucesso'
+            ])
             ->assertStatus(200);
     }
 
@@ -53,9 +58,14 @@ class {{ model }}ControllerTest extends TestCase
     {
         $model = {{ model }}::factory()->create();
 
-        $response = $this->deleteJson(route('{{ route }}.destroy', $model))
+        $this->deleteJson(route('{{ route }}.destroy', $model))
+            ->assertJsonFragment([
+                'message' => 'Removido com sucesso'
+            ])
             ->assertStatus(200);
 
-        $this->assertDatabaseMissing('{{ table }}', ['id' => $model->id]);
+        $this->assertSoftDeleted('{{ table }}', [
+            'id' => $model->id
+        ]);
     }
 }
