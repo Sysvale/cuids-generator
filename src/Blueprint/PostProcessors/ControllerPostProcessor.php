@@ -10,12 +10,13 @@ class ControllerPostProcessor
     {
         $path = base_path("app/Http/Controllers/{$model}Controller.php");
 
-        if (! File::exists($path)) return;
+        if (!File::exists($path)) return;
 
         $content = File::get($path);
+
         $content = preg_replace(
             
-            '/(Request\s+\$request,?\s*)|(Request\s+\$request\s*$)/',
+            '/\bRequest\s+\$request,\s*/',
             '',
             $content
         );
