@@ -53,7 +53,7 @@ class MongoModelTransformer implements PostProcessor
         if (!str_contains($content, 'MongoDB\\Laravel\\Eloquent\\SoftDeletes')) {
             $content = str_replace(
                 "use MongoDB\Laravel\Eloquent\Model;",
-                "use MongoDB\Laravel\Eloquent\Model;\nuse MongoDB\Laravel\Eloquent\SoftDeletes;",
+                "use MongoDB\Laravel\Eloquent\Model;\nuse Illuminate\Database\Eloquent\SoftDeletes;",
                 $content
             );
         }
@@ -61,7 +61,7 @@ class MongoModelTransformer implements PostProcessor
         if (!str_contains($content, 'use SoftDeletes;')) {
             $content = preg_replace(
                 '/(use HasFactory;)/',
-                "$1\n    use SoftDeletes;",
+                "\n    use SoftDeletes;\n    $1", 
                 $content
             );
         }
@@ -71,11 +71,21 @@ class MongoModelTransformer implements PostProcessor
 
     protected function cleanupCasts(string $content): string
     {
-        return preg_replace(
-            '/protected function casts\(\): array\s*\{[\s\S]*?\n\s*\}/',
+        $content = preg_replace(
+            '/protected function casts\(\): array\s*\{[\s\S]*?\}/',
             '',
             $content
         );
+
+        $content = preg_replace(
+            '/\/\*\*\s+\*\s+Get the attributes that should be cast\.[\s\S]*?\*\//',
+            '',
+            $content
+        );
+
+        $content = preg_replace('/\n\s*\n\s*\n/', "\n\n", $content);
+
+        return $content;
     }
 
     protected function setupVisibility(string $content): string

@@ -16,9 +16,7 @@ use function Laravel\Prompts\note;
 class CuidsGenerateCommand extends Command
 {
     protected $signature = 'cuids:generate';
-
     protected $description = 'Gera um novo módulo CUIDS';
-
     protected $blueprintWriter;
     protected $draftBuilder;
     protected $fieldEditor;
