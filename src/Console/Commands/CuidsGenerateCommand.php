@@ -4,6 +4,7 @@ namespace Sysvale\CuidsGenerator\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
 use Sysvale\CuidsGenerator\Blueprint\BlueprintWriter;
 use Sysvale\CuidsGenerator\Blueprint\Builders\DraftBuilder;
 use Sysvale\CuidsGenerator\Console\Editors\FieldEditor;
@@ -41,12 +42,15 @@ class CuidsGenerateCommand extends Command
 
     public function handle()
     {
-        $entity = text('Qual o nome do model (em inglês e no singular)?');
+        $entity = text('Qual o nome do model (em inglês)?');
 
-        $fields = $this->fieldEditor->run($this);
+        $fields = $this->fieldEditor->run();
+
         $relationships = [];
 
         $entityStudly = Str::studly(Str::singular($entity));
+
+        $externalModels = $this->getProjectModels();
 
         $this->newLine();
 
@@ -56,7 +60,7 @@ class CuidsGenerateCommand extends Command
             yes: 'Sim, configurar agora',
             no: 'Não, pular esta estapa'
         )) {
-            $relationships = $this->relationshipEditor->run($this);
+            $relationships = $this->relationshipEditor->run($externalModels);
         } else {
             note('Nenhum relacionamento configurado.');
         }
@@ -72,6 +76,19 @@ class CuidsGenerateCommand extends Command
         } catch (\Exception $e) {
             $this->error("Erro ao aplicar pós-processadores]: {$e->getMessage()}");
         }
+    }
+
+    public function getProjectModels(): array
+    {
+        $modelsPath = app_path('Models');
+
+        if (!File::isDirectory($modelsPath)) return [];
+
+        $files = File::allFiles($modelsPath);
+
+        return collect($files)->map(function ($file) {
+            return Str::replaceLast('.php', '', $file->getFilename());
+        })->toArray();
     }
 }
 
