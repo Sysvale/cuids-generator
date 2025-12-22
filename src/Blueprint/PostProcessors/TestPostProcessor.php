@@ -33,6 +33,12 @@ class TestPostProcessor
             $stub
         );
 
+        $content = str_replace(
+            "use App\Models\\" . $model . ";",
+            "use Database\Factories\\" . $model . "Factory;",
+            $content
+        );
+
         File::put($path, $content);
     }
 }

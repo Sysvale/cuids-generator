@@ -15,8 +15,8 @@ class ControllerPostProcessor
         $content = File::get($path);
 
         $content = str_replace(
-            'use Illuminate\Http\Request;',
-            '',
+            "use Illuminate\Http\Request;\n",
+            "",
             $content
         );
 
@@ -32,11 +32,7 @@ class ControllerPostProcessor
             $content
         );
 
-        $content = preg_replace(
-            '/\n\s*use Illuminate\\\\Http\\\\Response;/',
-            '',
-            $content
-        );
+        $content = preg_replace("/(\n\s*){3,}/", "\n\n", $content);
 
         File::put($path, $content);
     }
