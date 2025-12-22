@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysvale\CuidsGenerator\BluePrint\PostProcessors;
+namespace Sysvale\CuidsGenerator\Blueprint\PostProcessors;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
@@ -12,13 +12,9 @@ class FormFieldPostProcessor
         $lowerModel = Str::lower($model);
         $pluralModel = Str::plural($lowerModel);
 
-        $path = base_path("js/features/{$pluralModel}/constants/{$lowerModel}FormFields.ts");
+        $path = resource_path("js/features/{$pluralModel}/constants/{$lowerModel}FormFields.ts");
 
-        dump('path', $path);
-        dump('Existe? ', File::exists($path));
         if (! File::exists($path)) return;
-
-        dump('encontrou o arquivo');
 
         $content = File::get($path);
 
