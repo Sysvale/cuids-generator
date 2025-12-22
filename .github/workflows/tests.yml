@@ -15,11 +15,17 @@ jobs:
         with:
           php-version: '8.3'
           extensions: mbstring, dom, fileinfo, sqlite, gd
-          coverage: none
+          coverage: xdebug
 
       - name: Install Laravel Orchestral (Testbench)
         run: |
           composer update --prefer-stable --no-interaction
 
-      - name: Run Pest or PHPUnit Tests
-        run: vendor/bin/pest --compact --ci
+      - name: Run Pest with Coverage Report
+        run: vendor/bin/pest --coverage-html build/coverage --compact --ci
+
+      - name: Upload Report Artifact
+        uses: actions/upload-arifact@v4
+        with:
+          name: post-coverage-report
+          path: build/coverage

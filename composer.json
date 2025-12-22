@@ -32,7 +32,8 @@
     "prefer-stable": true,
     "require-dev": {
         "orchestra/testbench": "^9.0",
-        "pestphp/pest": "^4.1"
+        "pestphp/pest": "^4.1",
+        "pestphp/pest-plugin-drift": "^4.0"
     },
     "config": {
         "allow-plugins": {
