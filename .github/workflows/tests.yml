@@ -8,7 +8,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -17,7 +17,7 @@ jobs:
           extensions: mbstring, dom, fileinfo, sqlite, gd
           coverage: xdebug
 
-      - name: Install Laravel Orchestral (Testbench)
+      - name: Install Dependencies
         run: |
           composer update --prefer-stable --no-interaction
 
@@ -25,7 +25,7 @@ jobs:
         run: vendor/bin/pest --coverage-html build/coverage --compact --ci
 
       - name: Upload Report Artifact
-        uses: actions/upload-arifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: post-coverage-report
           path: build/coverage
