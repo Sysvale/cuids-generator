@@ -16,6 +16,11 @@
             "Sysvale\\CuidsGenerator\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Sysvale\\CuidsGenerator\\Tests\\": "tests/"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [

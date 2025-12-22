@@ -22,4 +22,4 @@ jobs:
           composer update --prefer-stable --no-interaction
 
       - name: Run Pest or PHPUnit Tests
-        run: vendor/bin/pest
+        run: vendor/bin/pest --compact --ci

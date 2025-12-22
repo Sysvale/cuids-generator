@@ -3,20 +3,16 @@
 namespace Sysvale\CuidsGenerator\Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
-use Sysvale\CuidsGenerator\CuidsGeneratorServiceProvider;
-use Sysvale\CuidsGenerator\Providers\CuidsGeneratorServiceProvider as ProvidersCuidsGeneratorServiceProvider;
+use Sysvale\CuidsGenerator\Providers\CuidsGeneratorServiceProvider;
+use Blueprint\BlueprintServiceProvider;
 
 class TestCase extends Orchestra
 {
-    protected function getPackageProviders($app)
+    protected function getPackageProviders($app): array
     {
         return [
-            ProvidersCuidsGeneratorServiceProvider::class,
+            BlueprintServiceProvider::class,
+            CuidsGeneratorServiceProvider::class,
         ];
-    }
-
-    protected function getEnvironmentSetUp($app)
-    {
-        // Configurações básicas de ambiente, se necessário
     }
 }
