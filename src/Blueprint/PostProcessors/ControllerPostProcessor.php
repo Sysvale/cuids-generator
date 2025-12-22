@@ -32,7 +32,11 @@ class ControllerPostProcessor
             $content
         );
 
-
+        $content = preg_replace(
+            '/\n\s*use Illuminate\\\\Http\\\\Response;/',
+            '',
+            $content
+        );
 
         File::put($path, $content);
     }

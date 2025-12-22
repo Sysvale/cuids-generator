@@ -3,7 +3,6 @@
 namespace Sysvale\CuidsGenerator\Console\Editors;
 
 use Sysvale\CuidsGenerator\Support\FieldType;
-use Illuminate\Console\Command;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\table;
@@ -26,6 +25,7 @@ class FieldEditor
                     'add' => 'Adicionar',
                     'rename' => 'Atualizar nome',
                     'change-type' => 'Atualizar tipo',
+                    'change-required' => 'Alterar obrigatoriedade',
                     'remove' => 'Remover',
                     'list' => 'Listar',
                     'done' => 'Ir para próxima etapa',
@@ -37,6 +37,7 @@ class FieldEditor
                 'add' => $this->add($fields),
                 'rename' => $this->rename($fields),
                 'change-type' => $this->changeType($fields),
+                'change-required' => $this->changeRequired($fields),
                 'remove' => $this->remove($fields),
                 'list' => $this->list($fields),
                 'done' => null,
@@ -66,12 +67,23 @@ class FieldEditor
             default: FieldType::values()[0]
         );
 
-        $fields[$name] = $type;
+        $requiredChoice = select(
+            label: "O campo '{$name}' é obrigatório?",
+            options: ['Sim', 'Não'],
+            default: 'Sim'
+        );
+
+        $fields[$name] = [
+            'name' => $name,
+            'type' => $type,
+            'required' => $requiredChoice === 'Sim',
+            'nullable' => $requiredChoice === 'Não',
+        ];
 
         $this->list($fields);
     }
 
-private function rename(array &$fields): void
+    private function rename(array &$fields): void
     {
         if ($this->isEmpty($fields)) return;
 
@@ -86,6 +98,7 @@ private function rename(array &$fields): void
         );
 
         $fields[$new] = $fields[$old];
+        $fields[$new]['name'] = $new;
         unset($fields[$old]);
 
         $this->list($fields);
@@ -96,10 +109,31 @@ private function rename(array &$fields): void
         if ($this->isEmpty($fields)) return;
 
         $name = select('Alterar tipo de qual campo?', array_keys($fields));
-        $fields[$name] = select(
+        
+        $newType = select(
             label: "Novo tipo para '{$name}'",
             options: FieldType::values()
         );
+
+        $fields[$name]['type'] = $newType;
+
+        $this->list($fields);
+    }
+
+    private function changeRequired(array &$fields): void
+    {
+        if ($this->isEmpty($fields)) return;
+
+        $name = select('Alterar obrigatoriedade de qual campo?', array_keys($fields));
+        
+        $requiredChoice = select(
+            label: "Novo status de obrigatoriedade para '{$name}'",
+            options: ['Sim', 'Não'],
+            default: $fields[$name]['required'] ? 'Sim' : 'Não'
+        );
+
+        $fields[$name]['required'] = $requiredChoice === 'Sim';
+        $fields[$name]['nullable'] = $requiredChoice === 'Não';
 
         $this->list($fields);
     }
@@ -122,8 +156,14 @@ private function rename(array &$fields): void
         if ($this->isEmpty($fields)) return;
 
         table(
-            ['Campo', 'Tipo'],
-            collect($fields)->map(fn ($t, $n) => [$n, $t])->toArray()
+            ['Campo', 'Tipo', 'Obrigatório'],
+            collect($fields)->map(function ($field) {
+                return [
+                    $field['name'],
+                    $field['type'],
+                    $field['required'] ? '✓ Sim' : '✗ Não'
+                ];
+            })->toArray()
         );
     }
 
