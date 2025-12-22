@@ -14,12 +14,25 @@ class ControllerPostProcessor
 
         $content = File::get($path);
 
-        $content = preg_replace(
-            
-            '/\bRequest\s+\$request,\s*/',
+        $content = str_replace(
+            'use Illuminate\Http\Request;',
             '',
             $content
         );
+
+        $content = preg_replace(
+            [
+                '/\bRequest\s+\$request,\s*/',
+                '/\(\s*Request\s+\$request\s*\)/',
+            ],
+            [
+                '',
+                '()',
+            ],
+            $content
+        );
+
+
 
         File::put($path, $content);
     }
