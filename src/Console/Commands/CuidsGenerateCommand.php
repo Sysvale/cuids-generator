@@ -87,6 +87,7 @@ class CuidsGenerateCommand extends Command
 
         try {
             $this->postProcessorRunner->run($entityStudly);
+            $this->info('Arquivos gerados com sucesso!');
         } catch (\Exception $e) {
             $this->error("Erro ao aplicar pós-processadores]: {$e->getMessage()}");
         }
@@ -96,7 +97,7 @@ class CuidsGenerateCommand extends Command
     {
         $modelsPath = app_path('Models');
 
-        if (!File::isDirectory($modelsPath)) return [];
+        if (! File::isDirectory($modelsPath)) return [];
 
         $files = File::allFiles($modelsPath);
 
@@ -105,5 +106,3 @@ class CuidsGenerateCommand extends Command
         })->toArray();
     }
 }
-
- 

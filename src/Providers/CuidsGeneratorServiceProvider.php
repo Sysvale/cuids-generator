@@ -11,8 +11,8 @@ use Sysvale\CuidsGenerator\Blueprint\PostProcessors\FactoryPostProcessor;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessors\Mongo\MongoModelTransformer;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessors\RequestPostProcessor;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessors\TestPostProcessor;
-use Sysvale\CuidsGenerator\Blueprint\PostProcessors\FormFieldPostProcessor;
 use Illuminate\Support\Facades\File;
+use Sysvale\CuidsGenerator\Blueprint\PostProcessors\RoutePostProcessor;
 
 class CuidsGeneratorServiceProvider extends ServiceProvider
 {
@@ -38,7 +38,7 @@ class CuidsGeneratorServiceProvider extends ServiceProvider
                 $app->make(TestPostProcessor::class),
                 $app->make(CollectionPostProcessor::class),
                 $app->make(ControllerPostProcessor::class),
-                $app->make(FormFieldPostProcessor::class),
+                $app->make(RoutePostProcessor::class),
             ]);
         });
     }
