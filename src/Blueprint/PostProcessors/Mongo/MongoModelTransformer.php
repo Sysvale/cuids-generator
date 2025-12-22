@@ -20,6 +20,8 @@ class MongoModelTransformer implements PostProcessor
 
         $content = $this->applySoftDeletes($content);
 
+        $content = $this->removeFactories($content);
+
         $content = $this->cleanupCasts($content);
 
         $content = $this->setupVisibility($content);
@@ -50,7 +52,7 @@ class MongoModelTransformer implements PostProcessor
 
     protected function applySoftDeletes(string $content): string
     {
-        if (!str_contains($content, 'MongoDB\\Laravel\\Eloquent\\SoftDeletes')) {
+        if (!str_contains($content, 'Illuminate\\Database\\Eloquent\\SoftDeletes')) {
             $content = str_replace(
                 "use MongoDB\Laravel\Eloquent\Model;",
                 "use MongoDB\Laravel\Eloquent\Model;\nuse Illuminate\Database\Eloquent\SoftDeletes;",
@@ -60,11 +62,28 @@ class MongoModelTransformer implements PostProcessor
 
         if (!str_contains($content, 'use SoftDeletes;')) {
             $content = preg_replace(
-                '/(use HasFactory;)/',
-                "\n    use SoftDeletes;\n    $1", 
+                '/(protected\s+\$collection\s*=\s*\'[^\']*\';)/',
+                "$1\n\n    use SoftDeletes;",
                 $content
             );
         }
+
+        return $content;
+    }
+
+    protected function removeFactories(string $content): string
+    {
+        $content = preg_replace(
+            '/use Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory;\n/', 
+            '', 
+            $content
+        );
+
+        $content = preg_replace(
+            '/\s+use HasFactory;/', 
+            '', 
+            $content
+        );
 
         return $content;
     }
