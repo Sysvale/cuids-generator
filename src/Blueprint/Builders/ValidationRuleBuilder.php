@@ -46,13 +46,13 @@ class ValidationRuleBuilder
     private static function getTypeRules(string $type): ?string
     {
         return match ($type) {
-            'string', 'text'        => 'string',
+            'string', 'text' => 'string',
             'integer', 'bigInteger' => 'integer',
-            'boolean'               => 'boolean',
+            'boolean' => 'boolean',
             'date', 'datetime', 
-            'timestamp'             => 'date',
-            'decimal', 'float'      => 'numeric',
-            default                 => null,
+            'timestamp' => 'date',
+            'decimal', 'float' => 'numeric',
+            default => null,
         };
     }
 }
