@@ -13,7 +13,6 @@ class DraftBuilder
     public function __construct(
         protected RequestBuilder $requestBuilder,
         protected ControllerBuilder $controllerBuilder,
-        protected PolicyBuilder $policyBuilder
     ) {}
 
     public function build(string $model, array $fields, array $relationships): array
@@ -26,7 +25,6 @@ class DraftBuilder
             ],
             'requests' =>$this->requestBuilder->build($model, $fields),
             'controllers' => $this->controllerBuilder->build($model),
-            'policies' => $this->policyBuilder->build($model),
         ];
 
         if (! empty($relationships)) {
