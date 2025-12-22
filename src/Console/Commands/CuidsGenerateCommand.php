@@ -10,6 +10,7 @@ use Sysvale\CuidsGenerator\Blueprint\Builders\DraftBuilder;
 use Sysvale\CuidsGenerator\Console\Editors\FieldEditor;
 use Sysvale\CuidsGenerator\Console\Editors\RelationshipEditor;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessorRunner;
+use Sysvale\CuidsGenerator\Blueprint\Builders\FormFieldBuilder;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\note;
@@ -23,13 +24,15 @@ class CuidsGenerateCommand extends Command
     protected $fieldEditor;
     protected $relationshipEditor;
     protected $postProcessorRunner;
+    protected $formFieldBuilder;
 
     public function __construct(
         BlueprintWriter $blueprintWriter,
         DraftBuilder $draftBuilder,
         FieldEditor $fieldEditor,
         RelationshipEditor $relationshipEditor,
-        PostProcessorRunner $postProcessorRunner
+        PostProcessorRunner $postProcessorRunner,
+        FormFieldBuilder $formFieldBuilder,
     ) {
         parent::__construct();
 
@@ -38,6 +41,7 @@ class CuidsGenerateCommand extends Command
         $this->fieldEditor = $fieldEditor;
         $this->relationshipEditor = $relationshipEditor;
         $this->postProcessorRunner = $postProcessorRunner;
+        $this->formFieldBuilder = $formFieldBuilder;
     }
 
     public function handle()
@@ -70,6 +74,16 @@ class CuidsGenerateCommand extends Command
         $this->blueprintWriter->write($draft);
 
         $this->call('blueprint:build');
+
+        $this->info('Gerando arquivo de constantes para o frontend...');
+
+        try {
+            $this->formFieldBuilder->handle($entityStudly, $fields);
+        } catch (\Exception $e) {
+            $this->error("Erro ao gerar arquivo de constantes do frontend: {$e->getMessage()}");
+        }
+
+        $this->info('Executando pós-processadores...');
 
         try {
             $this->postProcessorRunner->run($entityStudly);
