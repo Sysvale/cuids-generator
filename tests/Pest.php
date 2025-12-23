@@ -12,9 +12,7 @@
 */
 use Sysvale\CuidsGenerator\Tests\TestCase;
 
-pest()->extend(TestCase::class)
- // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature');
+uses(TestCase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
