@@ -6,8 +6,6 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class {{ model }}Collection extends ResourceCollection
 {
-    public static $wrap = null;
-
     public function toArray($request): array
     {
         return $this
