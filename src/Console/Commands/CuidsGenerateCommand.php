@@ -56,7 +56,9 @@ class CuidsGenerateCommand extends Command
 
         try {
             $this->components->info('Gerando rascunho do Blueprint...');
+
             $draft = $this->draftBuilder->build($entityStudly, $fields, $relationships);
+
             $this->blueprintWriter->write($draft);
 
             spin(fn () => $this->callSilent('blueprint:build'), 'Construindo arquivos via Blueprint...');
