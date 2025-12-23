@@ -143,10 +143,17 @@ class FieldEditor
         if ($this->isEmpty($fields)) return;
 
         $name = select('Remover qual campo?', array_keys($fields));
-        
-        if (confirm("Tem certeza que deseja remover '{$name}'?")) {
-            unset($fields[$name]);
-        }
+
+        $removeField = confirm(
+            label: "Tem certeza que deseja remover '{$name}'?",
+            default: true,
+            yes: 'Sim',
+            no: 'Não'
+        );
+
+        if (!$removeField) return;
+
+        unset($fields[$name]);
 
         $this->list($fields);
     }

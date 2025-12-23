@@ -14,6 +14,7 @@ use Sysvale\CuidsGenerator\Blueprint\Builders\FormFieldBuilder;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\note;
+use function Laravel\Prompts\spin;
 
 class CuidsGenerateCommand extends Command
 {
@@ -46,51 +47,61 @@ class CuidsGenerateCommand extends Command
 
     public function handle()
     {
-        $entity = text('Qual o nome do model (em inglês)?');
-
+        $entity = $this->askForEntityName();
         $fields = $this->fieldEditor->run();
-
-        $relationships = [];
 
         $entityStudly = Str::studly(Str::singular($entity));
 
-        $externalModels = $this->getProjectModels();
-
-        $this->newLine();
-
-        if (confirm(
-            label: 'Deseja adicionar relacionamentos a este model?',
-            default: true,
-            yes: 'Sim, configurar agora',
-            no: 'Não, pular esta estapa'
-        )) {
-            $relationships = $this->relationshipEditor->run($externalModels);
-        } else {
-            note('Nenhum relacionamento configurado.');
-        }
-
-        $draft = $this->draftBuilder->build($entityStudly, $fields, $relationships);
-
-        $this->blueprintWriter->write($draft);
-
-        $this->call('blueprint:build');
-
-        $this->info('Gerando arquivo de constantes para o frontend...');
+        $relationships = $this->askForRelationships();
 
         try {
+            $this->components->info('Gerando rascunho do Blueprint...');
+            $draft = $this->draftBuilder->build($entityStudly, $fields, $relationships);
+            $this->blueprintWriter->write($draft);
+
+            spin(fn () => $this->callSilent('blueprint:build'), 'Construindo arquivos via Blueprint...');
+
+            $this->components->info('Gerando constantes do frontend...');
             $this->formFieldBuilder->handle($entityStudly, $fields);
-        } catch (\Exception $e) {
-            $this->error("Erro ao gerar arquivo de constantes do frontend: {$e->getMessage()}");
-        }
 
-        $this->info('Executando pós-processadores...');
-
-        try {
+            $this->components->info('Aplicando pós-processadores...');
             $this->postProcessorRunner->run($entityStudly);
-            $this->info('Arquivos gerados com sucesso!');
+
+            $this->components->info("Módulo {$entityStudly} gerado com sucesso!");
+            
         } catch (\Exception $e) {
-            $this->error("Erro ao aplicar pós-processadores]: {$e->getMessage()}");
+            $this->error("Falha na geração: {$e->getMessage()}");
+            return Command::FAILURE;
         }
+
+        return Command::SUCCESS;
+    }
+
+    protected function askForEntityName(): string
+    {
+        return text(
+            label: 'Qual o nome do model (em inglês)?',
+            validate: fn ($value) => empty($value) ? 'Obrigatório' : null
+        );
+    }
+
+    protected function askForRelationships(): array
+    {
+        $this->newLine();
+        
+        $wantsRelationships = confirm(
+            label: 'Deseja adicionar relacionamentos?',
+            default: true,
+            yes: 'Sim, configurar',
+            no: 'Pular'
+        );
+
+        if (!$wantsRelationships) {
+            note('Nenhum relacionamento configurado.');
+            return [];
+        }
+
+        return $this->relationshipEditor->run($this->getProjectModels());
     }
 
     public function getProjectModels(): array

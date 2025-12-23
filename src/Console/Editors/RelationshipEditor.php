@@ -118,11 +118,18 @@ class RelationshipEditor
         if ($this->isEmpty($relationships)) return;
 
         $name = select('Remover qual relacionamento?', array_keys($relationships));
-        
-        if (confirm("Deseja realmente remover o vínculo com '{$name}'?")) {
-            unset($relationships[$name]);
-            warning("Relacionamento com '{$name}' removido.");
-        }
+
+        $removeRelationship = confirm(
+            label: "Deseja realmente remover o vínculo com '{$name}'?",
+            default: true,
+            yes: 'Sim',
+            no: 'Não'
+        );
+
+        if (!$removeRelationship) return;
+
+        unset($relationships[$name]);
+        warning("Relacionamento com '{$name}' removido.");
 
         $this->list($relationships);
     }
