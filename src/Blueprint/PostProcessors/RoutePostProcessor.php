@@ -4,7 +4,6 @@ namespace Sysvale\CuidsGenerator\Blueprint\PostProcessors;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 class RoutePostProcessor
 {
@@ -12,83 +11,65 @@ class RoutePostProcessor
     {
         $path = base_path('routes/web.php');
 
-        if (! File::exists($path)) {
+        if (!File::exists($path)) {
             return;
         }
 
         $content = File::get($path);
 
-        $content = $this->removeBlueprintResourceRoute($content, $model);
+        $content = $this->transformToApiResource($content, $model);
 
-        $updated = $this->registerBackEndRoute($content, $model);
+        $content = $this->ensureControllerImport($content, $model);
 
-        File::put($path, $updated);
+        File::put($path, $content);
     }
 
-    private function registerBackEndRoute(string $content, string $model): string
+    private function transformToApiResource(string $content, string $model): string
     {
-        $lines = explode("\n", $content);
-
         $controller = Str::studly($model) . 'Controller';
-        $routeName  = Str::kebab(Str::pluralStudly($model));
+        $resourceName = Str::kebab(Str::pluralStudly($model));
 
-        $useLine   = "use App\Http\Controllers\\{$controller};";
-        $routeLine = "    Route::apiResource('/{$routeName}', {$controller}::class);";
+        $pattern = '/Route::resource\s*\(\s*[\'"][^\'"]+[\'"]\s*,\s*\\\\?App\\\\Http\\\\Controllers\\\\' . $controller . '::class\s*\)(?:\s*->(?:except|only)\s*\([^)]+\))?\s*;/';
 
-        $foundImportMarker  = false;
-        $foundRegisterMarker = false;
+        $replacement = "Route::apiResource('/{$resourceName}', {$controller}::class);";
 
-        $result = [];
+        return preg_replace($pattern, $replacement, $content);
+    }
 
-        foreach ($lines as $line) {
-            if (str_contains($line, '@endcontrollerimport')) {
-                $foundImportMarker = true;
+    private function ensureControllerImport(string $content, string $model): string
+    {
+        $controller = Str::studly($model) . 'Controller';
+        $useLine = "use App\Http\Controllers\\{$controller};";
 
-                if (! str_contains($content, $useLine)) {
-                    $result[] = $useLine;
-                }
-            }
-
-            if (str_contains($line, '@endroutergister')) {
-                $foundRegisterMarker = true;
-
-                if (! str_contains($content, $routeLine)) {
-                    if (! empty($result) && trim(end($result)) !== '') {
-                        $result[] = '';
-                    }
-
-                    $result[] = $routeLine;
-                }
-            }
-
-            $result[] = $line;
+        if (str_contains($content, $useLine)) {
+            return $content;
         }
 
-        if (! $foundImportMarker) {
-            throw new RuntimeException(
-                'Não foi possível encontrar o marcador @endcontrollerimport em routes/web.php'
+        $pattern = '/use App\\\\Http\\\\Controllers\\\\.*;/';
+        
+        if (preg_match_all($pattern, $content, $matches, PREG_OFFSET_CAPTURE)) {
+            $lastMatch = end($matches[0]);
+            $lastMatchText = $lastMatch[0];
+            $lastMatchOffset = $lastMatch[1];
+
+            return substr_replace(
+                $content, 
+                $lastMatchText . "\n" . $useLine, 
+                $lastMatchOffset, 
+                strlen($lastMatchText)
             );
         }
 
-        if (! $foundRegisterMarker) {
-            throw new RuntimeException(
-                'Não foi possível encontrar o marcador @endroutergister em routes/web.php'
+        if (preg_match_all('/use .*;/i', $content, $matches, PREG_OFFSET_CAPTURE)) {
+            $lastMatch = end($matches[0]);
+            return substr_replace(
+                $content, 
+                $lastMatch[0] . "\n" . $useLine, 
+                $lastMatch[1], 
+                strlen($lastMatch[0])
             );
         }
 
-        return implode("\n", $result);
-    }
-
-    private function removeBlueprintResourceRoute(string $content, string $model): string
-    {
-        $controller = Str::studly($model) . 'Controller';
-
-        $pattern = sprintf(
-            '/Route::resource\s*\(\s*[\'"][^\'"]+[\'"]\s*,\s*App\\\\Http\\\\Controllers\\\\%s::class\s*\)
-            \s*(->(?:only|except)\s*\([^)]+\))?\s*;/mx',
-            $controller
-        );
-
-        return preg_replace($pattern, '', $content);
+        return str_replace('<?php', "<?php\n\n{$useLine}", $content);
     }
 }
