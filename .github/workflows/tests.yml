@@ -31,23 +31,15 @@ jobs:
           extensions: mbstring, dom, fileinfo, sqlite, gd
           coverage: xdebug
 
-          tools: composer:v2
-
       - name: Install Dependencies
         run: |
-          # 1. Definimos as versões alvo sem atualizar ainda
           composer require "illuminate/support:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-          
-          # 2. Executamos o update com -W para permitir downgrades de dependências do Pest/PHPUnit
-          # Usamos --no-audit para acelerar o processo no CI
           composer update --prefer-stable --no-interaction --no-progress -W
 
       - name: Run Pest with Coverage Report
         run: |
-          # Gera o relatório HTML para o artefato
           vendor/bin/pest --coverage-html build/coverage --compact --ci
-          
-          # Valida o mínimo de 90% focado apenas no seu comando principal
+
           vendor/bin/pest --coverage --min=90 --filter=CuidsGenerateCommand
         env:
           XDEBUG_MODE: coverage
