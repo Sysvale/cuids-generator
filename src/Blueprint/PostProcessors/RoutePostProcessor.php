@@ -29,7 +29,9 @@ class RoutePostProcessor
         $controller = Str::studly($model) . 'Controller';
         $resourceName = Str::kebab(Str::pluralStudly($model));
 
-        $pattern = '/Route::resource\s*\(\s*[\'"][^\'"]+[\'"]\s*,\s*\\\\?App\\\\Http\\\\Controllers\\\\' . $controller . '::class\s*\)(?:\s*->(?:except|only)\s*\([^)]+\))?\s*;/';
+        $pattern = '/Route::resource\s*\(\s*[\'"][^\'"]+[\'"]\s*,\s*\\\\?App\\\\Http\\\\Controllers\\\\'
+            . $controller
+            . '::class\s*\)(?:\s*->(?:except|only)\s*\([^)]+\))?\s*;/';
 
         $replacement = "Route::apiResource('/{$resourceName}', {$controller}::class);";
 
@@ -46,16 +48,16 @@ class RoutePostProcessor
         }
 
         $pattern = '/use App\\\\Http\\\\Controllers\\\\.*;/';
-        
+
         if (preg_match_all($pattern, $content, $matches, PREG_OFFSET_CAPTURE)) {
             $lastMatch = end($matches[0]);
             $lastMatchText = $lastMatch[0];
             $lastMatchOffset = $lastMatch[1];
 
             return substr_replace(
-                $content, 
-                $lastMatchText . "\n" . $useLine, 
-                $lastMatchOffset, 
+                $content,
+                $lastMatchText . "\n" . $useLine,
+                $lastMatchOffset,
                 strlen($lastMatchText)
             );
         }
@@ -63,9 +65,9 @@ class RoutePostProcessor
         if (preg_match_all('/use .*;/i', $content, $matches, PREG_OFFSET_CAPTURE)) {
             $lastMatch = end($matches[0]);
             return substr_replace(
-                $content, 
-                $lastMatch[0] . "\n" . $useLine, 
-                $lastMatch[1], 
+                $content,
+                $lastMatch[0] . "\n" . $useLine,
+                $lastMatch[1],
                 strlen($lastMatch[0])
             );
         }
