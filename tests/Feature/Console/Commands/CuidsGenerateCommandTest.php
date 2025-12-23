@@ -22,7 +22,7 @@ class CuidsGenerateCommandTest extends TestCase
         });
     }
 
-    public function testAlegria()
+    public function testCanGenerateModuleWithRelationships()
     {
         $fields = ['name' => [
             'name' => 'name',
@@ -65,6 +65,46 @@ class CuidsGenerateCommandTest extends TestCase
         $this->artisan('cuids:generate')
             ->expectsQuestion('Qual o nome do model (em inglês)?', 'Supervisor')
             ->expectsConfirmation('Deseja adicionar relacionamentos?', 'yes')
+            ->assertExitCode(0);
+    }
+
+    public function testHandleExceptionDuringGenerationAndExit()
+    {
+        $this->mock(FieldEditor::class)->shouldReceive('run')->andReturn([]);
+
+        $this->mock(DraftBuilder::class)
+            ->shouldReceive('build')
+            ->andThrow(new \Exception('Erro Simulado'));
+
+        $this->artisan('cuids:generate')
+            ->expectsQuestion('Qual o nome do model (em inglês)?', 'Supervisor')
+            ->expectsConfirmation('Deseja adicionar relacionamentos?', 'no')
+            ->expectsOutput('Falha na geração: Erro Simulado')
+            ->assertExitCode(1);
+    }
+
+    public function testShowsNoteWhenSkippingRelationships()
+    {
+        $this->mock(FieldEditor::class)
+            ->shouldReceive('run')
+            ->andReturn([]);
+        $this->mock(DraftBuilder::class)
+            ->shouldReceive('build')
+            ->andReturn(['models' => []]);
+
+        $this->mock(BlueprintWriter::class)
+            ->shouldReceive('write');
+
+        $this->mock(FormFieldBuilder::class)
+            ->shouldReceive('handle');
+
+        $this->mock(PostProcessorRunner::class)
+            ->shouldReceive('run');
+
+        $this->artisan('cuids:generate')
+            ->expectsQuestion('Qual o nome do model (em inglês)?', 'Supervisor')
+            ->expectsConfirmation('Deseja adicionar relacionamentos?', 'no')
+            ->expectsOutputToContain('Nenhum relacionamento configurado.')
             ->assertExitCode(0);
     }
 }
