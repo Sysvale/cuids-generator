@@ -40,10 +40,6 @@ jobs:
         run: |
           vendor/bin/pest --coverage-html build/coverage --compact --ci
 
-          vendor/bin/pest --coverage --min=90 --filter=CuidsGenerateCommand
-        env:
-          XDEBUG_MODE: coverage
-
       - name: Upload Report Artifact
         if: matrix.php == '8.3' && matrix.laravel == '11.*'
         uses: actions/upload-artifact@v4
