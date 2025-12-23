@@ -5,6 +5,20 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3']
+        laravel: ['10.*', '11.*', '12.*']
+        include:
+          - laravel: '10.*'
+            testbench: '^8.0'
+          - laravel: '11.*'
+            testbench: '^9.0'
+          - laravel: '12.*'
+            testbench: '^10.0'
+
+    name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }}
 
     steps:
       - name: Checkout code
@@ -13,18 +27,29 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: ${{ matrix.php }}
           extensions: mbstring, dom, fileinfo, sqlite, gd
           coverage: xdebug
 
       - name: Install Dependencies
         run: |
+          # Forçamos a instalação da versão específica do Laravel definida na Matrix
+          composer require "illuminate/support:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --prefer-stable --no-interaction
 
       - name: Run Pest with Coverage Report
-        run: vendor/bin/pest --coverage-html build/coverage --compact --ci
+        run: |
+          # Gera o relatório HTML
+          vendor/bin/pest --coverage-html build/coverage --compact --ci
+          
+          # Valida o mínimo de 90% apenas no comando principal
+          vendor/bin/pest --coverage --min=90 --filter=CuidsGenerateCommand
+        env:
+          XDEBUG_MODE: coverage
 
       - name: Upload Report Artifact
+
+        if: matrix.php == '8.3' && matrix.laravel == '11.*'
         uses: actions/upload-artifact@v4
         with:
           name: post-coverage-report
