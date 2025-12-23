@@ -62,6 +62,14 @@ class CuidsGenerateCommand extends Command
 
             $this->blueprintWriter->write($draft);
 
+            $generators = config('blueprint.generators');
+
+            if (isset($generators['migration'])) {
+                unset($generators['migration']);
+            }
+
+            config(['blueprint.generators' => $generators]);
+
             spin(fn () => $this->callSilent('blueprint:build'), 'Construindo arquivos via Blueprint...');
 
             $this->components->info('Gerando constantes do frontend...');
