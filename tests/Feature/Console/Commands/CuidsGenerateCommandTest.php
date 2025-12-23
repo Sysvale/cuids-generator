@@ -1,14 +1,70 @@
 <?php
 
+namespace Sysvale\CuidsGenerator\Tests\Feature\Console\Commands;
+
 use Illuminate\Support\Facades\Artisan;
+use Sysvale\CuidsGenerator\Tests\TestCase;
+use Sysvale\CuidsGenerator\Console\Editors\FieldEditor;
+use Sysvale\CuidsGenerator\Console\Editors\RelationshipEditor;
+use Sysvale\CuidsGenerator\Blueprint\BlueprintWriter;
+use Sysvale\CuidsGenerator\Blueprint\Builders\DraftBuilder;
 use Sysvale\CuidsGenerator\Blueprint\Builders\FormFieldBuilder;
-use Illuminate\Support\Facades\File;
+use Sysvale\CuidsGenerator\Blueprint\PostProcessorRunner;
 
-test('it can detect the command', function () {
-    $commands = Artisan::all();
-    expect($commands)->toHaveKey('cuids:generate');
-});
+class CuidsGenerateCommandTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-test('it shows an error message when FormFieldBuilder fails', function () {
+        $this->app->booted(function () {
+            Artisan::command('blueprint:build', fn() => 0);
+        });
+    }
 
-});
+    public function testAlegria()
+    {
+        $fields = ['name' => [
+            'name' => 'name',
+            'type' => 'string',
+            'required' => true,
+            'nullable' => false
+            ]
+        ];
+
+        $relationships = ['User' => 'belongsTo'];
+        $draft = ['models' => ['Supervisor' => []]];
+
+        $this->mock(FieldEditor::class)
+            ->shouldReceive('run')
+            ->once()
+            ->andReturn($fields);
+
+        $this->mock(RelationshipEditor::class)
+            ->shouldReceive('run')
+            ->once()
+            ->with(\Mockery::any())
+            ->andReturn($relationships);
+
+        $this->mock(DraftBuilder::class)
+            ->shouldReceive('build')
+            ->once()
+            ->andReturn($draft);
+
+        $this->mock(BlueprintWriter::class)
+            ->shouldReceive('write')
+            ->once();
+        $this->mock(FormFieldBuilder::class)
+            ->shouldReceive('handle')
+            ->once();
+
+        $this->mock(PostProcessorRunner::class)
+            ->shouldReceive('run')
+            ->once();
+
+        $this->artisan('cuids:generate')
+            ->expectsQuestion('Qual o nome do model (em inglês)?', 'Supervisor')
+            ->expectsConfirmation('Deseja adicionar relacionamentos?', 'yes')
+            ->assertExitCode(0);
+    }
+}
