@@ -13,7 +13,7 @@ O **Cuids Generator** é uma ferramenta de linha de comando para Laravel projeta
 Antes de começar, verifique se seu ambiente atende aos requisitos mínimos:
 
 - **PHP**: `^8.1` (Recomendado `8.3`)
-- **Laravel Framework**: `^10.0` ou `^11.0`
+- **Laravel Framework**: `10.0` ou superior
 - **Laravel Blueprint**: `^2.12`
 - **Driver MongoDB**: Configurado e funcional em sua aplicação Laravel.
 
@@ -21,15 +21,29 @@ Antes de começar, verifique se seu ambiente atende aos requisitos mínimos:
 
 ## ⚙️ Instalação
 
-Você pode instalar o pacote via Composer:
+Adicione o repositório em seu `composer.json`
+```json
+"repositories": [
+	{
+		"name": "sysvale/cuids-generator",
+		"type": "git",
+		"url": "https://github.com/Sysvale/cuids-generator"
+	}
+]
+
+```
+Para executar uma branch específica, execute o seguinte comando:
 
 ```bash
-composer require sysvale/cuids-generator
+composer require sysvale/cuids-generator:dev-<nome-branch> -W
 ```
+
+Desenvolvimento
+
 
 ## 🛠️ Como usar
 
-Você pode instalar o pacote via Composer:
+Executando o  comando:
 
 ```bash
 php artisan cuids:generate
