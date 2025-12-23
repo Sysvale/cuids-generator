@@ -3,6 +3,7 @@
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\{{ model }};
+use Database\Factories\UserFactory;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
@@ -13,6 +14,14 @@ class {{ model }}ControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $user = UserFactory::new()->create([
+            'tenant_fqn' => 'fake-fqn'
+        ]);
+
+        session()->put('tenant_fqn', 'fake-fqn');
+
+        $this->actingAs($user);
     }
 
     public function testIf{{ pluralModel }}AreListedCorrectly(): void
@@ -22,7 +31,12 @@ class {{ model }}ControllerTest extends TestCase
             ->create();
 
         $this->getJson(route('{{ route }}.index'))
-            ->assertStatus(200);
+            ->assertJsonStructure([
+                'data',
+                'meta',
+                'links'
+            ])
+            ->assertOk();
     }
 
     public function testIf{{ model }}CanBeCreated(): void
@@ -32,7 +46,11 @@ class {{ model }}ControllerTest extends TestCase
             ->toArray();
 
         $this->postJson(route('{{ route }}.store'), $data)
-            ->assertStatus(201);
+            ->assertCreated(201);
+
+        $this->assertDatabaseHas('{{ table }}', [
+            '{{ firstKey }}' => $data['{{ firstKey }}'],
+        ]);
     }
 
     public function testIf{{ model }}CanBeShown(): void
@@ -41,7 +59,7 @@ class {{ model }}ControllerTest extends TestCase
             ->create();
 
         $this->getJson(route('{{ route }}.show', $model))
-            ->assertStatus(200);
+            ->assertOk();
     }
 
     public function testIf{{ model }}CanBeUpdated(): void
@@ -54,7 +72,12 @@ class {{ model }}ControllerTest extends TestCase
             ->toArray();
 
         $this->putJson(route('{{ route }}.update', $model), $updatedData)
-            ->assertStatus(200);
+            ->assertOk();
+
+        $this->assertDatabaseHas('{{ table }}', [
+            'id' => $model->id,
+            '{{ firstKey }}' => $updatedData['{{ firstKey }}'],
+        ]);
     }
 
     public function testIf{{ model }}CanBeDeleted(): void
@@ -63,7 +86,7 @@ class {{ model }}ControllerTest extends TestCase
             ->create();
 
         $this->deleteJson(route('{{ route }}.destroy', $model))
-            ->assertStatus(204);
+            ->assertNoContent();
 
         $this->assertSoftDeleted('{{ table }}', [
             'id' => $model->id

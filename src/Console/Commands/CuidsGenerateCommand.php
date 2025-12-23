@@ -76,7 +76,7 @@ class CuidsGenerateCommand extends Command
             $this->formFieldBuilder->handle($entityStudly, $fields);
 
             $this->components->info('Aplicando pós-processadores...');
-            $this->postProcessorRunner->run($entityStudly);
+            $this->postProcessorRunner->run($entityStudly, $fields);
 
             $this->components->info("Módulo {$entityStudly} gerado com sucesso!");
         } catch (\Exception $e) {

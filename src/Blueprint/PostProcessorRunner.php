@@ -9,10 +9,10 @@ class PostProcessorRunner
     ) {
     }
 
-    public function run(string $model): void
+    public function run(string $model, array $fields): void
     {
         foreach ($this->processors as $processor) {
-            $processor->handle($model);
+            $processor->handle($model, $fields);
         }
     }
 }
