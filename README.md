@@ -23,7 +23,6 @@ Antes de começar, verifique se seu ambiente atende aos requisitos mínimos:
 
 - **PHP**: `^8.1` (Recomendado `8.3`)
 - **Laravel Framework**: `10.0` ou superior
-- **Laravel Blueprint**: `^2.12`
 - **Driver MongoDB**: Configurado e funcional em sua aplicação Laravel.
 
 ---
