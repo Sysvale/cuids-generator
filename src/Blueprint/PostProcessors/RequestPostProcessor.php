@@ -15,7 +15,9 @@ class RequestPostProcessor implements PostProcessor
         ];
 
         foreach ($files as $path) {
-            if (! File::exists($path)) continue;
+            if (! File::exists($path)) {
+                continue;
+            }
 
             $content = File::get($path);
 

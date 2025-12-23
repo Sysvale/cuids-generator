@@ -49,7 +49,7 @@ class ValidationRuleBuilder
             'string', 'text' => 'string',
             'integer', 'bigInteger' => 'integer',
             'boolean' => 'boolean',
-            'date', 'datetime', 
+            'date', 'datetime',
             'timestamp' => 'date',
             'decimal', 'float' => 'numeric',
             default => null,

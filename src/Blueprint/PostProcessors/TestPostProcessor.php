@@ -12,7 +12,7 @@ class TestPostProcessor
         $path = base_path("tests/Feature/Http/Controllers/{$model}ControllerTest.php");
 
         $stubPath = __DIR__ . '/../Stubs/controller.test.stub';
-        
+
         if (!File::exists($stubPath)) {
             return;
         }

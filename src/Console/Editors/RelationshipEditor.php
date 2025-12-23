@@ -4,6 +4,7 @@ namespace Sysvale\CuidsGenerator\Console\Editors;
 
 use Sysvale\CuidsGenerator\Support\RelationshipType;
 use Illuminate\Console\Command;
+
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\table;
@@ -33,7 +34,9 @@ class RelationshipEditor
                 default: 'add'
             );
 
-            if ($action === 'done') break;
+            if ($action === 'done') {
+                break;
+            }
 
             match ($action) {
                 'add'    => $this->add($relationships),
@@ -93,7 +96,9 @@ class RelationshipEditor
 
     private function update(array &$relationships): void
     {
-        if ($this->isEmpty($relationships)) return;
+        if ($this->isEmpty($relationships)) {
+            return;
+        }
 
         $collection = select(
             'Selecione o relacionamento para atualizar',
@@ -115,7 +120,9 @@ class RelationshipEditor
 
     private function remove(array &$relationships): void
     {
-        if ($this->isEmpty($relationships)) return;
+        if ($this->isEmpty($relationships)) {
+            return;
+        }
 
         $name = select('Remover qual relacionamento?', array_keys($relationships));
 
@@ -126,7 +133,9 @@ class RelationshipEditor
             no: 'Não'
         );
 
-        if (!$removeRelationship) return;
+        if (!$removeRelationship) {
+            return;
+        }
 
         unset($relationships[$name]);
         warning("Relacionamento com '{$name}' removido.");
@@ -136,7 +145,9 @@ class RelationshipEditor
 
     private function list(array $relationships): void
     {
-        if ($this->isEmpty($relationships)) return;
+        if ($this->isEmpty($relationships)) {
+            return;
+        }
 
         table(
             ['Model Relacionado', 'Tipo'],

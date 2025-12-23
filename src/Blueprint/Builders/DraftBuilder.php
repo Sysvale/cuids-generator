@@ -13,7 +13,8 @@ class DraftBuilder
     public function __construct(
         protected RequestBuilder $requestBuilder,
         protected ControllerBuilder $controllerBuilder,
-    ) {}
+    ) {
+    }
 
     public function build(string $model, array $fields, array $relationships): array
     {
@@ -23,7 +24,7 @@ class DraftBuilder
             'models' => [
                 $model => $formattedModelsFields,
             ],
-            'requests' =>$this->requestBuilder->build($model, $fields),
+            'requests' => $this->requestBuilder->build($model, $fields),
             'controllers' => $this->controllerBuilder->build($model),
         ];
 
@@ -53,7 +54,7 @@ class DraftBuilder
         foreach ($relationships as $relatedModel => $type) {
             if ($type === 'belongsTo') {
                 $foreignKey = Str::snake($relatedModel) . '_id';
-                $formatted[$foreignKey] = 'string'; 
+                $formatted[$foreignKey] = 'string';
             }
         }
 

@@ -14,7 +14,9 @@ class FormFieldPostProcessor
 
         $path = resource_path("js/features/{$pluralModel}/constants/{$lowerModel}FormFields.ts");
 
-        if (! File::exists($path)) return;
+        if (! File::exists($path)) {
+            return;
+        }
 
         $content = File::get($path);
 

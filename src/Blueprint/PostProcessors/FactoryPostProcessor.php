@@ -9,8 +9,10 @@ class FactoryPostProcessor
     public function handle(string $model): void
     {
         $path = base_path("database/factories/{$model}Factory.php");
-        
-        if (! File::exists($path)) return;
+
+        if (! File::exists($path)) {
+            return;
+        }
 
         $content = File::get($path);
 

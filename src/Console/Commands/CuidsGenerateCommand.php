@@ -11,6 +11,7 @@ use Sysvale\CuidsGenerator\Console\Editors\FieldEditor;
 use Sysvale\CuidsGenerator\Console\Editors\RelationshipEditor;
 use Sysvale\CuidsGenerator\Blueprint\PostProcessorRunner;
 use Sysvale\CuidsGenerator\Blueprint\Builders\FormFieldBuilder;
+
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\note;
@@ -70,7 +71,6 @@ class CuidsGenerateCommand extends Command
             $this->postProcessorRunner->run($entityStudly);
 
             $this->components->info("Módulo {$entityStudly} gerado com sucesso!");
-            
         } catch (\Exception $e) {
             $this->error("Falha na geração: {$e->getMessage()}");
             return Command::FAILURE;
@@ -90,7 +90,7 @@ class CuidsGenerateCommand extends Command
     protected function askForRelationships(): array
     {
         $this->newLine();
-        
+
         $wantsRelationships = confirm(
             label: 'Deseja adicionar relacionamentos?',
             default: true,
@@ -110,7 +110,9 @@ class CuidsGenerateCommand extends Command
     {
         $modelsPath = app_path('Models');
 
-        if (! File::isDirectory($modelsPath)) return [];
+        if (! File::isDirectory($modelsPath)) {
+            return [];
+        }
 
         $files = File::allFiles($modelsPath);
 

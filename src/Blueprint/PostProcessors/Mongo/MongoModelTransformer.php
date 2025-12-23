@@ -12,7 +12,9 @@ class MongoModelTransformer implements PostProcessor
     {
         $path = app_path("Models/{$model}.php");
 
-        if (!File::exists($path)) return;
+        if (!File::exists($path)) {
+            return;
+        }
 
         $content = File::get($path);
 
@@ -39,7 +41,7 @@ class MongoModelTransformer implements PostProcessor
 
         if (!str_contains($content, 'protected $connection')) {
             $collection = Str::snake(Str::pluralStudly($model));
-            
+
             $content = preg_replace(
                 '/(class\s+' . $model . '\s+extends\s+Model\s*\{)/',
                 "$1\n    protected \$connection = 'mongodb';\n    protected \$collection = '{$collection}';",
@@ -74,14 +76,14 @@ class MongoModelTransformer implements PostProcessor
     protected function removeFactories(string $content): string
     {
         $content = preg_replace(
-            '/use Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory;\n/', 
-            '', 
+            '/use Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory;\n/',
+            '',
             $content
         );
 
         $content = preg_replace(
-            '/\s+use HasFactory;/', 
-            '', 
+            '/\s+use HasFactory;/',
+            '',
             $content
         );
 
@@ -110,7 +112,6 @@ class MongoModelTransformer implements PostProcessor
     protected function setupVisibility(string $content): string
     {
         if (!str_contains($content, 'protected $appends')) {
-
             $content = preg_replace(
                 '/(protected\s+\$fillable\s*=\s*\[[^\]]*\];)/s',
                 "$1\n\n    protected \$appends = ['id'];\n    protected \$hidden = ['_id'];",

@@ -3,6 +3,7 @@
 namespace Sysvale\CuidsGenerator\Console\Editors;
 
 use Sysvale\CuidsGenerator\Support\FieldType;
+
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\table;
@@ -43,7 +44,9 @@ class FieldEditor
                 'done' => null,
             };
 
-            if ($action === 'done') break;
+            if ($action === 'done') {
+                break;
+            }
         }
 
         return $fields;
@@ -85,7 +88,9 @@ class FieldEditor
 
     private function rename(array &$fields): void
     {
-        if ($this->isEmpty($fields)) return;
+        if ($this->isEmpty($fields)) {
+            return;
+        }
 
         $old = select('Selecione o campo para renomear', array_keys($fields));
         $new = text(
@@ -106,10 +111,12 @@ class FieldEditor
 
     private function changeType(array &$fields): void
     {
-        if ($this->isEmpty($fields)) return;
+        if ($this->isEmpty($fields)) {
+            return;
+        }
 
         $name = select('Alterar tipo de qual campo?', array_keys($fields));
-        
+
         $newType = select(
             label: "Novo tipo para '{$name}'",
             options: FieldType::values()
@@ -122,10 +129,12 @@ class FieldEditor
 
     private function changeRequired(array &$fields): void
     {
-        if ($this->isEmpty($fields)) return;
+        if ($this->isEmpty($fields)) {
+            return;
+        }
 
         $name = select('Alterar obrigatoriedade de qual campo?', array_keys($fields));
-        
+
         $requiredChoice = select(
             label: "Novo status de obrigatoriedade para '{$name}'",
             options: ['Sim', 'Não'],
@@ -140,7 +149,9 @@ class FieldEditor
 
     private function remove(array &$fields): void
     {
-        if ($this->isEmpty($fields)) return;
+        if ($this->isEmpty($fields)) {
+            return;
+        }
 
         $name = select('Remover qual campo?', array_keys($fields));
 
@@ -151,7 +162,9 @@ class FieldEditor
             no: 'Não'
         );
 
-        if (!$removeField) return;
+        if (!$removeField) {
+            return;
+        }
 
         unset($fields[$name]);
 
@@ -160,7 +173,9 @@ class FieldEditor
 
     private function list(array $fields): void
     {
-        if ($this->isEmpty($fields)) return;
+        if ($this->isEmpty($fields)) {
+            return;
+        }
 
         table(
             ['Campo', 'Tipo', 'Obrigatório'],

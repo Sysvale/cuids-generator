@@ -12,7 +12,9 @@ class CollectionPostProcessor
 
         $stubPath = __DIR__ . '/../Stubs/collection.stub';
 
-        if (!File::exists($stubPath)) return;
+        if (!File::exists($stubPath)) {
+            return;
+        }
 
         $stub = File::get($stubPath);
 

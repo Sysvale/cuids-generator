@@ -66,5 +66,6 @@ class CuidsGeneratorServiceProvider extends ServiceProvider
     }
 
     public function boot(): void
-    {}
+    {
+    }
 }

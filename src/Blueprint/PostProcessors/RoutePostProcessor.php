@@ -29,7 +29,7 @@ class RoutePostProcessor
     {
         $lines = explode("\n", $content);
 
-        $controller = Str::studly($model).'Controller';
+        $controller = Str::studly($model) . 'Controller';
         $routeName  = Str::kebab(Str::pluralStudly($model));
 
         $useLine   = "use App\Http\Controllers\\{$controller};";
@@ -84,7 +84,8 @@ class RoutePostProcessor
         $controller = Str::studly($model) . 'Controller';
 
         $pattern = sprintf(
-            '/Route::resource\s*\(\s*[\'"][^\'"]+[\'"]\s*,\s*App\\\\Http\\\\Controllers\\\\%s::class\s*\)\s*(->(?:only|except)\([^)]+\))?\s*;/m',
+            '/Route::resource\s*\(\s*[\'"][^\'"]+[\'"]\s*,\s*App\\\\Http\\\\Controllers\\\\%s::class\s*\)
+            \s*(->(?:only|except)\s*\([^)]+\))?\s*;/mx',
             $controller
         );
 

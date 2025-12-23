@@ -10,7 +10,9 @@ class ControllerPostProcessor
     {
         $path = base_path("app/Http/Controllers/{$model}Controller.php");
 
-        if (!File::exists($path)) return;
+        if (!File::exists($path)) {
+            return;
+        }
 
         $content = File::get($path);
 
