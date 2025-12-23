@@ -2,6 +2,7 @@
 
 namespace Sysvale\CuidsGenerator\Console\Editors;
 
+use Illuminate\Support\Str;
 use Sysvale\CuidsGenerator\Support\FieldType;
 
 use function Laravel\Prompts\select;
@@ -64,20 +65,22 @@ class FieldEditor
             }
         );
 
+        $fieldName = $this->sanitizeFieldName($name);
+
         $type = select(
-            label: "Qual o tipo de '{$name}'?",
+            label: "Qual o tipo de '{$fieldName}'?",
             options: FieldType::values(),
             default: FieldType::values()[0]
         );
 
         $requiredChoice = select(
-            label: "O campo '{$name}' é obrigatório?",
+            label: "O campo '{$fieldName}' é obrigatório?",
             options: ['Sim', 'Não'],
             default: 'Sim'
         );
 
-        $fields[$name] = [
-            'name' => $name,
+        $fields[$fieldName] = [
+            'name' => $fieldName,
             'type' => $type,
             'required' => $requiredChoice === 'Sim',
             'nullable' => $requiredChoice === 'Não',
@@ -102,8 +105,10 @@ class FieldEditor
             }
         );
 
-        $fields[$new] = $fields[$old];
-        $fields[$new]['name'] = $new;
+        $fieldName = $this->sanitizeFieldName($new);
+
+        $fields[$fieldName] = $fields[$old];
+        $fields[$fieldName]['name'] = $fieldName;
         unset($fields[$old]);
 
         $this->list($fields);
@@ -196,5 +201,10 @@ class FieldEditor
             return true;
         }
         return false;
+    }
+
+    private function sanitizeFieldName(string $name): string
+    {
+        return Str::snake(Str::camel(Str::singular($name)));
     }
 }
