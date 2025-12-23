@@ -1,6 +1,13 @@
 name: Test Package Commands
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - '*'
 
 jobs:
   test:
@@ -30,15 +37,21 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: mbstring, dom, fileinfo, sqlite, gd
           coverage: xdebug
+          tools: composer:v2
 
       - name: Install Dependencies
         run: |
           composer require "illuminate/support:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --prefer-stable --no-interaction --no-progress -W
 
+      - name: Check Code Style
+        run: composer lint
+
       - name: Run Pest with Coverage Report
         run: |
-          vendor/bin/pest --coverage-html build/coverage --compact --ci
+          composer test:coverage -- --compact --ci
+        env:
+          XDEBUG_MODE: coverage
 
       - name: Upload Report Artifact
         if: matrix.php == '8.3' && matrix.laravel == '11.*'

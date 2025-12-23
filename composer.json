@@ -33,11 +33,18 @@
     "require-dev": {
         "orchestra/testbench": "^8.22|^9.0",
         "pestphp/pest": "^2.34|^3.0",
-        "pestphp/pest-plugin-drift": "^2.0|^3.0"
+        "pestphp/pest-plugin-drift": "^2.0|^3.0",
+        "squizlabs/php_codesniffer": "^4.0"
     },
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
+    },
+    "scripts": {
+        "lint": "phpcs .",
+        "fix": "phpcbf .",
+        "test": "pest",
+        "test:coverage": "pest --coverage-html build/coverage"
     }
 }

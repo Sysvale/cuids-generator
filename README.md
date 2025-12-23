@@ -43,9 +43,22 @@ O que o comando faz:
 
 ## 🧪 Desenvolvimento e Testes
 Este pacote utiliza o Pest PHP para garantir cobertura do comando de geração de módulos, verificando a cobertura com o coverage.
-Para rodar os testes:
+- Para rodar os testes:
 ```bash
-vendor/bin/pest --coverage-html build/coverage --compact --ci
+    composer test
+```
+- Cobertura
+```bash
+    composer test:coverage
+```
+- Checar estilo
+```bash
+    composer lint
+```
+
+- Corrigir estilo
+```bash
+    composer fix
 ```
 
 ## 🏗️ Estrutura de pastas
