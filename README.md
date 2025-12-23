@@ -1,3 +1,12 @@
+<p align="center">
+  <img
+    src="https://github.com/user-attachments/assets/f5de8089-e4ca-4235-8a4d-4695731e58a9"
+    width="600"
+    alt="Gemini Generated Image"
+  />
+</p>
+
+
 # Cuids Generator 🚀
 
 [![Tests](https://github.com/sysvale/cuids-generator/actions/workflows/tests.yml/badge.svg)](https://github.com/sysvale/cuids-generator/actions)
