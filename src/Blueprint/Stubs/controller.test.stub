@@ -1,0 +1,95 @@
+<?php
+
+namespace Tests\Feature\Http\Controllers;
+
+use App\Models\{{ model }};
+use Database\Factories\UserFactory;
+use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
+
+class {{ model }}ControllerTest extends TestCase
+{
+    use WithFaker;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $user = UserFactory::new()->create([
+            'tenant_fqn' => 'fake-fqn'
+        ]);
+
+        session()->put('tenant_fqn', 'fake-fqn');
+
+        $this->actingAs($user);
+    }
+
+    public function testIf{{ pluralModel }}AreListedCorrectly(): void
+    {
+        {{ model }}Factory::new()
+            ->count(3)
+            ->create();
+
+        $this->getJson(route('{{ route }}.index'))
+            ->assertJsonStructure([
+                'data',
+                'meta',
+                'links'
+            ])
+            ->assertOk();
+    }
+
+    public function testIf{{ model }}CanBeCreated(): void
+    {
+        $data = {{ model }}Factory::new()
+            ->make()
+            ->toArray();
+
+        $this->postJson(route('{{ route }}.store'), $data)
+            ->assertCreated(201);
+
+        $this->assertDatabaseHas('{{ table }}', [
+            '{{ firstKey }}' => $data['{{ firstKey }}'],
+        ]);
+    }
+
+    public function testIf{{ model }}CanBeShown(): void
+    {
+        $model = {{ model }}Factory::new()
+            ->create();
+
+        $this->getJson(route('{{ route }}.show', $model))
+            ->assertOk();
+    }
+
+    public function testIf{{ model }}CanBeUpdated(): void
+    {
+        $model = {{ model }}Factory::new()
+            ->create();
+
+        $updatedData = {{ model }}Factory::new()
+            ->make()
+            ->toArray();
+
+        $this->putJson(route('{{ route }}.update', $model), $updatedData)
+            ->assertOk();
+
+        $this->assertDatabaseHas('{{ table }}', [
+            'id' => $model->id,
+            '{{ firstKey }}' => $updatedData['{{ firstKey }}'],
+        ]);
+    }
+
+    public function testIf{{ model }}CanBeDeleted(): void
+    {
+        $model = {{ model }}Factory::new()
+            ->create();
+
+        $this->deleteJson(route('{{ route }}.destroy', $model))
+            ->assertNoContent();
+
+        $this->assertSoftDeleted('{{ table }}', [
+            'id' => $model->id
+        ]);
+    }
+}

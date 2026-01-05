@@ -1,0 +1,16 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class {{ model }}Collection extends ResourceCollection
+{
+    public function toArray($request): array
+    {
+        return $this
+            ->collection
+            ->transform(fn($data) => new {{ model }}Resource($data))
+            ->toArray();
+    }
+}
